@@ -61,24 +61,25 @@ int main()
 #include <malloc.h>
     
 
-extern void output_name ( char *p ) ;
+void output_name(char *p);
 
-void main(void )
-{
+int main(int argc,char** argv)
+{   
     char  *name;
-    name = malloc(11);
-    if (name !=NULL) output_name(name);
-    free(name);
+    name = malloc(12);
+    if (name !=NULL) 
+        output_name(name);
     printf("name=%s",name);  
+    free(name);
     
 }
 
-void output_name ( char *p )  
+void output_name(char *p)  
 {   
     char *temp;  
  
     int i, j, k;
-    char name[11] = "Joe Jakeson";  
+    char name[12] = "Joe Jakeson";  
 
     temp = p;
     k = 0;
@@ -101,7 +102,7 @@ void output_name ( char *p )
          }
     }
  
-}  
+} 
 
 
 
