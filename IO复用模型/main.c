@@ -195,6 +195,7 @@ int main( int argc,char** argv )
         }
     }
     
+    free(g_pSvr);
     return 0;
 }
 
