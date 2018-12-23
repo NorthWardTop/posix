@@ -27,13 +27,19 @@ int initSock(int* skfd,const char* addr,int port)
     int flg=0;
     struct sockaddr_in  
     //´´½¨socket
-    skfd=sock(AF_INET,SOCK_STREAM,0);
-    bzero(&g_pSvr->svrAddr,sizeof(g_pSvr->));
-    g_pSvr->svrAddr.sin_family = AF_INET;
+    if(-1==skfd=sock(AF_INET,SOCK_STREAM,0))
+    {
+        perror("server socket create error!\n");
+        flg=-1;
+    }
+    
+    bzero(&g_pSvr->svrAddr,sizeof(g_pSvr->svrAddr));g_pSvr->svrAddr.sin_family = AF_INET;
     //×Ö·û´®µØÖ·×ª»»ÍøÂç×Ö½ÚÐòµØÖ·
-    inet_pton(AF_INET,addr,&g_pSvr->svrAddr.sin_addr.s_addr);
+    inet_pton(AF_INET,addr,&g_pSvr->svrAddr.sin_addr);
+    //inet_ntop()
     g_pSvr->svrAddr.sin_port = htons(PORT);
     //bind addr info with global socket
+    
     if(-1==bind(g_pSvr->svrFd, \
         (struct sockaddr*)&g_pSvr->svrAddr,sizeof(g_pSvr->svrAddr)))
     {

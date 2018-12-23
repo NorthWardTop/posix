@@ -18,6 +18,8 @@ using namespace std;
 #define MAX_FD_SIZE     1024
 #define PORT            8848
 #define ADDR            "127.0.0.1"
+#define MAX_DATALINE    1024
+
 
 typedef struct _Server
 {
@@ -58,6 +60,72 @@ int initServer( Server* pServer )
     flg = 0;
 
     return flg;
+}
+
+
+/*****************************************************************************
+ 函 数 名  : procCltData
+ 功能描述  : 处理客户端数据业务逻辑
+ 输入参数  : int cltFd
+ 输出参数  : 无
+ 返 回 值  : int
+ 调用函数  : 
+ 被调函数  : 
+ 
+ 修改历史      :
+  1.日    期   : 2018年12月24日
+    作    者   : my
+    修改内容   : 新生成函数
+
+*****************************************************************************/
+int procCltData( int cltFd )
+{
+    char buf[MAX_DATALINE]
+    int ret=read(cltFd,buf,MAX_DATALINE);
+    if(ret==0)
+    {
+        close(cltFd);
+        return -1;
+    }
+    write(stdout,buf,ret);
+    write(cltFd,buf,ret);//回写给客户端
+    return 0;
+}
+
+/*****************************************************************************
+ 函 数 名  : procCltConn
+ 功能描述  : 处理客户端的连接
+ 输入参数  : srtuct pollfd* cltFds, int num
+ 输出参数  : 无
+ 返 回 值  : void
+ 调用函数  : 
+ 被调函数  : 
+ 
+ 修改历史      :
+  1.日    期   : 2018年12月24日
+    作    者   : my
+    修改内容   : 新生成函数
+
+*****************************************************************************/
+void procCltConn( srtuct pollfd* cltFds, int num )
+{
+    unsigned int i=0;
+    int ret=-1
+    for(i=1;i<num;++i)
+    {
+        if(cltFds[i]<0)
+            continue;
+        //判断客户端句柄数据是否准备好//checker(圈复杂度)
+        if(cltFds[i].revents & POLLIN)
+        {
+            ret=procCltData();
+            if(-1==ret)
+            {
+                cltFds[i].fd=-1;
+                continue;
+            }
+        }
+    }
 }
 
 
