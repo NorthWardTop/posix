@@ -1,0 +1,27 @@
+select poll epoll
+服务器的并发个数
+随着fd的个数增大select poll效率在大幅下降
+epoll---事件
+一个文件描述符----》多个描述符 （多个文件描述符抽象为了事件---》内核的事件表中）
+
+epoll
+
+
+  int epoll_create(int size);
+  int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+  int epoll_wait(int epfd, struct epoll_event *events,
+                      int maxevents, int timeout);
+
+    EPOLL_CTL_ADD
+	EPOLL_CTL_MOD
+	EPOLL_CTL_DEL
+	
+demo:
+	 struct epoll_event event
+	 event.events =EPOLLIN | EPOLLPRI;
+	 event.data.fd  = listenfd
+	 epoll_ctl(epfd,EPOLL_CTL_ADD,listenfd,&event)
+	
+	
+epollfd=epoll_create
+epoll_ctl
