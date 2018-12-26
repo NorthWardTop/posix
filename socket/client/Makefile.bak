@@ -11,7 +11,7 @@ OBJS = $(patsubst %.c,%.o,$(SRC))
 
 # $@(自动目标文件名) $^(自动所有依赖文件名) $<(第一个依赖的文件名) 
 $(OBJGEN):$(OBJS)
-	$(CC) -g -o  $@ $^
+	$(CC) -g $(CCFLG)  $@ $^
 
 .PHONY:
 clean:

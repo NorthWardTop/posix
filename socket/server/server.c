@@ -26,7 +26,7 @@ int main(int argc,char** argv)
     //参数不是2个或者端口号小与0
     if(2!=argc || ((port=atoi(argv[1]))<0))
     {
-        printf("%s, port\n",argv[0]);
+        printf("%s: port\n",argv[0]);
         exit(1);
     }
 
