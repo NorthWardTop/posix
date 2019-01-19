@@ -5,10 +5,15 @@ epoll---事件
 一个文件描述符----》多个描述符 （多个文件描述符抽象为了事件---》内核的事件表中）
 
 epoll
-
+通过wait返回值判断有多少event
+通过返回参数events链表判断都是什么event
+根据不同的event的fd判断句柄
+	event[i].data.fd==listenfd {判断事件类型(POLLIN}
+	event[i].data.fd== cltConnect{判断类型}
 
   int epoll_create(int size);
   int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+  events输出参数,内核返回的事件链表
   int epoll_wait(int epfd, struct epoll_event *events,
                       int maxevents, int timeout);
 
@@ -16,7 +21,7 @@ epoll
 	EPOLL_CTL_MOD
 	EPOLL_CTL_DEL
 	
-demo:
+demo: 
 	 struct epoll_event event
 	 event.events =EPOLLIN | EPOLLPRI;
 	 event.data.fd  = listenfd
