@@ -1,0 +1,1 @@
+cmd_/mnt/hgfs/SI/LinuxkernelStu/DOS.原始sock/app-kernel/socketopt.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /mnt/hgfs/SI/LinuxkernelStu/DOS.原始sock/app-kernel/socketopt.ko /mnt/hgfs/SI/LinuxkernelStu/DOS.原始sock/app-kernel/socketopt.o /mnt/hgfs/SI/LinuxkernelStu/DOS.原始sock/app-kernel/socketopt.mod.o
