@@ -5,37 +5,35 @@
 #include <arpa/inet.h>
 #include "myGeneral.h"
 
+#define ADDR "127.0.0.1"
+#define PORT 80
+#define BUF_SIZE 1024
+#define REQUEST_SIZE 4096
 
-#define ADDR            "127.0.0.1"
-#define PORT            80
-#define BUF_SIZE        1024
-#define REQUEST_SIZE    4096
-
-int main(int argc, const char** argv)
+int main(int argc, const char **argv)
 {
+
+    //连接服务器部分------------------
     int ret, sock_fd;
     struct sockaddr_in srv_addr;
-
-
-    sock_fd=socket(AF_INET, SOCK_STREAM, 0);
-    if(sock_fd<0)
+    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock_fd < 0)
         handle_error("create socket err");
-    
+
     //填充sockaddr对象
     bzero(&srv_addr, sizeof(srv_addr));
-    srv_addr.family=AF_INET;
-    srv_addr.sin_port=htons(PORT);
-    ret=inet_pton(AF_INET, ADDR, &srv_addr.sin_addr);
-    if(ret<0)
+    srv_addr.family = AF_INET;
+    srv_addr.sin_port = htons(PORT);
+    ret = inet_pton(AF_INET, ADDR, &srv_addr.sin_addr);
+    if (ret < 0)
         handle_error("string to binary err");
 
-    ret=connect(sock_fd, (struct sockaddr*)&srv_addr, sizeof(srv_addr));
-    if(ret<0)
+    ret = connect(sock_fd, (struct sockaddr *)&srv_addr, sizeof(srv_addr));
+    if (ret < 0)
         handle_error("connect err");
-    
     printf("连接服务器成功\n");
-    
-    //发送数据
+
+    //拼接请求部分------------------------
     char buf[BUF_SIZE];
     char requer[REQUEST_SIZE];
     char qqCode[REQUEST_SIZE];
@@ -64,7 +62,45 @@ int main(int argc, const char** argv)
     strcat(requer, "\r\n\r\n");
     printf("requer: %s\n", requer);
     //写入socket, 发出请求
-    ret=write(sock_fd,requer, strlen(requer));
-    if(ret<0)
-        handle_error("request")
+    ret = write(sock_fd, requer, strlen(requer));
+    if (ret < 0)
+    {
+        close(sock_fd);
+        handle_error("request");
+    }
+    else
+        printf("Successful sending of requests: %d bytes", ret);
+
+    //-----------select部分------------------------
+    fd_set set_fds;
+    struct timeval tv;
+    FD_ZERO(&set_fds);
+    FD_SET(sock_fd, &set_fds);
+    char buf[BUF_SIZE];
+    int read_size;
+
+    while (1)
+    {
+        sleep(2);
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
+        ret = select(sock_fd + 1, &set_fds, NULL, NULL, &tv);
+        if (ret < 0)
+        {
+            close(sock_fd);
+            handle_error("select set_fds err");
+        }
+        else if (ret > 0)
+        {
+            memset(buf, 0, BUF_ZISE);
+            read_size = read(sock_fd, buf, BUF_SIZE);
+            if(read_size==0)
+            {
+                close(sock_fd);
+                handle_error("Read socket data err, The other party is closed!");
+            }
+            printf("socket say: %s", buf);
+        }
+    }
+
 }
