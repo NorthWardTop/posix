@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "myGeneral.h"
@@ -22,19 +23,29 @@ int main(int argc, const char **argv)
 
     //填充sockaddr对象
     bzero(&srv_addr, sizeof(srv_addr));
-    srv_addr.family = AF_INET;
+    srv_addr.sin_family = AF_INET;
     srv_addr.sin_port = htons(PORT);
     ret = inet_pton(AF_INET, ADDR, &srv_addr.sin_addr);
-    if (ret < 0)
-        handle_error("string to binary err");
+    // if (ret < 0)
+    //     handle_error("string to binary err");
+    if (ret <= 0)
+    {
+        if (ret == 0)
+            fprintf(stderr, "Not in presentation format");
+        else
+            perror("inet_pton");
+        exit(EXIT_FAILURE);
+    }
 
-    ret = connect(sock_fd, (struct sockaddr *)&srv_addr, sizeof(srv_addr));
+    ret = connect(sock_fd, (struct sockaddr *)&srv_addr, sizeof(struct sockaddr));
     if (ret < 0)
+    {
+        close(sock_fd);
         handle_error("connect err");
+    }
     printf("连接服务器成功\n");
 
     //拼接请求部分------------------------
-    char buf[BUF_SIZE];
     char requer[REQUEST_SIZE];
     char qqCode[REQUEST_SIZE];
     char str_qqCodeLen[128];
@@ -43,7 +54,7 @@ int main(int argc, const char **argv)
     //设置QQCode请求参数
     strcat(qqCode, "qqCode=474497857");
     //获取qqCode的长度, 请求参数转化为字符串
-    sprintf(str_qqCodeLen, "%d", strlen(qqCode));
+    sprintf(str_qqCodeLen, "%d", (int)strlen(qqCode));
 
     //置空请求串
     memset(requer, 0, REQUEST_SIZE);
@@ -92,9 +103,9 @@ int main(int argc, const char **argv)
         }
         else if (ret > 0)
         {
-            memset(buf, 0, BUF_ZISE);
+            memset(buf, 0, BUF_SIZE);
             read_size = read(sock_fd, buf, BUF_SIZE);
-            if(read_size==0)
+            if (read_size == 0)
             {
                 close(sock_fd);
                 handle_error("Read socket data err, The other party is closed!");
@@ -102,5 +113,6 @@ int main(int argc, const char **argv)
             printf("socket say: %s", buf);
         }
     }
-
+    close(sock_fd);
+    return 0;
 }
