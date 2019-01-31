@@ -1,0 +1,91 @@
+wait_event   TASK_UNINTERRUPTIBLE
+
+static void sleep(unsigned howlong)
+{
+	current->state = TASK_INTERRUPTIBLE;
+	schedule_timeout(howlong);
+}
+							Linux 有名管道 消息队列 共享内存 信号量
+
+流定向
+	popen
+	pclose
+	
+有名管道 fifo
+	实现原理：基于文件系统 fifo是一种特殊的文件. 
+	mknod PIPETEST p      管道文件
+	cat popen_example.c > PIPETEST &
+	[1] 2493  启动进程为2493
+	cat < PIPETEST
+	[1]+  已完成 	
+	PIPETEST 进程间通信
+	
+	存储在磁盘---->fifo文件的描述信息
+	当fifo两端进程全部关闭时，其数据就丢失了
+	
+    int mkfifo(const char *pathname, mode_t mode);
+	const char *pathname	 路径 ----要创建的fifo不能提前存在
+	mode_t mode 664 666 
+	chmod test 777
+	664
+	读写fifo 
+	 open  write read 
+	一个进程以某种方式打开fifo 当前进程进入阻塞 
+	直到另外一个进程以另外一种方式打开fifo 此时阻塞返回
+	一个进程可以以可读可写的方式打开
+	
+	两个进程打开fifo ，阻塞读操作  -----read aio_read 
+	管道没有数据 就一直阻塞 
+	
+	写操作 但是fifo里面满了--->写阻塞 一直等到有人读 才能写入
+	fifo空间满了 
+	
+	一端是写操作，另外一段关闭了fifo ，写端进程会受到SIGPIPE信号 
+	一段是读，另外一端关闭了FIFO，读端不会阻塞 
+	
+	suid  ----
+	setuid() 
+	
+	管道是特殊文件  先入先出 不能定位
+	管道是单向 
+	阻塞问题 
+	
+	信号量  消息队列 共享内存 ------system V
+	
+	ipcs
+	ipcrm 
+	
+	key  ID
+	
+	Linux 为每个IPC机制都分配了ID
+	问：要通信的进程 如何获得IPC的ID值
+	答：在创建IPC的时候 就有ID值-----只对创建IPC的进程而言 
+	key值 
+	使用IPC进程互相约定key作为创建IPC的依据 
+	key能够随意指定么 
+	ftok
+	key_t ftok(const char *pathname, int proj_id);
+	const char *pathname  一般设定为当前目录 .  必须存在
+	/test/ ----
+	stat(/test/)------struct stat 
+	stat.st_dev
+	stat.ino
+	key  31-24 为proj_id的低8位
+		 23-16 为st_dev的低8位
+		 15-0  为ino的低16位
+	使用相同的文件路径 和 proj_id 得到的key是相同和唯一的-----创建IPC的时候 ID是相同的
+	所以能进行IPC通信 
+	
+消息队列：
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
