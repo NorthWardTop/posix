@@ -1,12 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 
 
 
 
 
+
+
+
+
+/*
 struct msqid_ds {
 	struct ipc_perm msg_perm;
 	struct msg *msg_first;		/* first message on queue,unused  */
@@ -22,6 +24,7 @@ struct msqid_ds {
 	__kernel_ipc_pid_t msg_lspid;	/* pid of last msgsnd */
 	__kernel_ipc_pid_t msg_lrpid;	/* last receive pid */
 };
+*/
 
 
 
