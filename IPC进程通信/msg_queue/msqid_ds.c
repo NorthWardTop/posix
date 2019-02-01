@@ -1,3 +1,90 @@
+/*
+ * @Author: northward
+ * @Github: https://github.com/northwardtop
+ * @Date: 2019-01-31 21:12:28
+ * @LastEditors: northward
+ * @LastEditTime: 2019-02-02 02:49:27
+ * @Description: Description
+ */
+
+
+
+
+#include "common.h"
+#include "myGeneral.h"
+
+//根据提供的flags生成消息队列, 返回队列id
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ */
+int creat_queue(int flags)
+{
+	//生成key
+	key_t key=ftok(PATH, PROJ_ID);
+	if(key<0)
+		handle_error("failed to generate key");
+	int msg_id=msgget(key, flags);
+	if(msg_id<0)
+		handle_error("msgget failed");
+	return msg_id;
+}
+
+//根据队列id, 销毁消息队列
+int delete_queue(int msg_id)
+{
+	int ret=msgctl(msg_id, IPC_RMID, NULL);
+	if(ret<0)
+		handle_error("msgctl-remove message queue failed");
+	return 0;
+}
+
+//接受消息
+/**
+ * @description: 
+ * @param {type} 
+ * 
+ * @return: 
+ */
+int recv_msg(int msg_id, int type, char* buf, int buf_size)
+{
+	struct msgbuf _buf;
+	memset(&_buf, '\0', sizeof(_buf));
+	int ret=msgrcv(msg_id, &_buf, sizeof(_buf.mtext), type, 0);
+	if(ret<0)
+	{
+		show_msg("msgrcv failed");
+		return -errno;
+	}
+	memset(buf, '\0', buf_size);
+	strcpy(buf, _buf.mtext);
+	return 0;
+}
+
+//发送消息
+
+
+
+ssize_t send_msg(int msg_id, int type, const char* msg)
+{
+	int ret;
+	struct msgbuf _buf;
+
+	memset(&_buf, '\0', sizeof(_buf));
+	_buf.mtype=type;
+	strcpy(_buf.mtext, msg, sizeof(msg)+1);
+
+	ret=msgsnd(msg_id, &_buf, sizeof(_buf.mtext),0);
+	if(ret<0)
+	{
+		show_msg("msgsnd failed");
+		return -errno;
+	}
+	printf("send message: %s\n", _buf.mtext);
+	return 0;
+}
+
 
 
 
