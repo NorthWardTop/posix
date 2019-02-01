@@ -13,3 +13,5 @@ while (0)
 
 
 #define getnbit(bits, begin, n) (bits>>(begin-n+1) & ((1 << (n + 1)) - 1))
+#define BCD_TO_BIN(val) ((val)=((val)&15) + ((val)>>4)*10)
+
