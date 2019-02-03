@@ -1,5 +1,16 @@
+/*
+ * @Author: northward
+ * @Github: https://github.com/northwardtop
+ * @Date: 2019-02-01 21:26:19
+ * @LastEditors: northward
+ * @LastEditTime: 2019-02-02 19:39:29
+ * @Description: Description
+ */
+
 #include "common.h"
 #include "myGeneral.h"
+
+
 int main(int argc, const char **argv)
 {
     //服务端(创建端)消息队列使用方法
@@ -16,21 +27,21 @@ int main(int argc, const char **argv)
     int msg_id = creat_queue(IPC_CREAT | IPC_EXCL | 0666);
     if (msg_id < 0)
         handle_error("create message queue err");
-    while (1)
+    while (strcmp(buf, "q") == 0)
     {
         memset(buf, '\0', BUF_SIZE);
         ret = recv_msg(msg_id, CLIENT_TYPE, buf, sizeof(buf));
         if (ret < 0)
             handle_error("receive err from message queue");
         printf("client say: %s\n", buf);
-    }
-    printf("Please enter the message to be sent:\n");
-    // fflush(stdout);
-    scanf("%s", buf);
-    ret = send_msg(msg_id, SERVER_TYPE, buf);
-    if (ret < 0)
-        printf("send failed");
 
+        printf("Please enter the message to be sent:\n");
+        // fflush(stdout);
+        scanf("%s", buf);
+        ret = send_msg(msg_id, SERVER_TYPE, buf);
+        if (ret < 0)
+            printf("send failed");
+    }
     ret = delete_queue(msg_id);
     if (ret < 0)
         handle_error("delete message queue failed");
