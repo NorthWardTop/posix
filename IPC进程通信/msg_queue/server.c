@@ -3,7 +3,7 @@
  * @Github: https://github.com/northwardtop
  * @Date: 2019-02-01 21:26:19
  * @LastEditors: northward
- * @LastEditTime: 2019-02-02 19:39:29
+ * @LastEditTime: 2019-02-07 14:40:17
  * @Description: Description
  */
 
@@ -27,7 +27,7 @@ int main(int argc, const char **argv)
     int msg_id = creat_queue(IPC_CREAT | IPC_EXCL | 0666);
     if (msg_id < 0)
         handle_error("create message queue err");
-    while (strcmp(buf, "q") == 0)
+    while (strcmp(buf, "q") != 0)
     {
         memset(buf, '\0', BUF_SIZE);
         ret = recv_msg(msg_id, CLIENT_TYPE, buf, sizeof(buf));
@@ -36,7 +36,7 @@ int main(int argc, const char **argv)
         printf("client say: %s\n", buf);
 
         printf("Please enter the message to be sent:\n");
-        // fflush(stdout);
+        fflush(stdout);
         scanf("%s", buf);
         ret = send_msg(msg_id, SERVER_TYPE, buf);
         if (ret < 0)

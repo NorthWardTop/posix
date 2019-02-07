@@ -3,7 +3,7 @@
  * @Github: https://github.com/northwardtop
  * @Date: 2019-02-01 21:26:10
  * @LastEditors: northward
- * @LastEditTime: 2019-02-02 18:55:43
+ * @LastEditTime: 2019-02-07 14:44:27
  * @Description: Description
  */
 
@@ -21,11 +21,11 @@ int main(int argc, const char** argv)
     char buf[BUF_SIZE];
     msg_id=get_queue(); //调用creat_queue, 将找到和server创建id相同的msg队列
 
-    while(strcmp(buf, "q")==0)
+    while(strcmp(buf, "q")!=0)
     {
-        printf("Please enter the message to be sent:\n");
         fflush(stdout);
         memset(buf, '\0', sizeof(buf));
+        printf("Please enter the message to be sent:\n");
         scanf("%s", buf);
         ret=send_msg(msg_id, CLIENT_TYPE, buf);
         if(ret<0)
