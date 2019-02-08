@@ -3,7 +3,7 @@
  * @Github: https://github.com/northwardtop
  * @Date: 2019-02-07 19:50:31
  * @LastEditors: northward
- * @LastEditTime: 2019-02-08 21:10:00
+ * @LastEditTime: 2019-02-08 21:47:05
  * @Description: Description
  */
 #include <stdio.h>
@@ -53,12 +53,13 @@ int main(int argc, const char *argv[])
     //通过GETVAL 获得sem值并打印
     for(int i=0;i<MAX_SEM; ++i)
     {   //未指定数组
-        ret=smectl(sem_id,i,GETVAL);
-        printf("use GETVAL semaphore %d value is %d, read array is %d\n", \
-        i, [i], sem_read_arr[i]);
+        ret=semctl(sem_id,i,GETVAL);
+        printf("use GETVAL semaphore %d value is %d\n", \
+        i, ret);
     }
     //删除信号量
     ret=semctl(sem_id, 0, IPC_RMID);
-
+    if(ret<0)
+        perror("semctl IPC_RMID err");
     return 0;
 }
