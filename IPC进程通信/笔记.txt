@@ -1,139 +1,139 @@
-﻿wait_event   TASK_UNINTERRUPTIBLE
+wait_event   TASK_UNINTERRUPTIBLE
 
 static void sleep(unsigned howlong)
 {
 	current->state = TASK_INTERRUPTIBLE;
 	schedule_timeout(howlong);
 }
-							Linux 有名管道 消息队列 共享内存 信号量
+							Linux �����ܵ� ��Ϣ���� �����ڴ� �ź���
 
-流定向
+������
 	popen
 	pclose
 	
-有名管道 fifo
-	实现原理：基于文件系统 fifo是一种特殊的文件. 
-	mknod PIPETEST p      管道文件
+�����ܵ� fifo
+	ʵ��ԭ���������ļ�ϵͳ fifo��һ��������ļ�. 
+	mknod PIPETEST p      �ܵ��ļ�
 	cat popen_example.c > PIPETEST &
-	[1] 2493  启动进程为2493
+	[1] 2493  ��������Ϊ2493
 	cat < PIPETEST
-	[1]+  已完成 	
-	PIPETEST 进程间通信
+	[1]+  ����� 	
+	PIPETEST ���̼�ͨ��
 	
-	存储在磁盘---->fifo文件的描述信息
-	当fifo两端进程全部关闭时，其数据就丢失了
+	�洢�ڴ���---->fifo�ļ���������Ϣ
+	��fifo���˽���ȫ���ر�ʱ�������ݾͶ�ʧ��
 	
     int mkfifo(const char *pathname, mode_t mode);
-	const char *pathname	 路径 ----要创建的fifo不能提前存在
+	const char *pathname	 ·�� ----Ҫ������fifo������ǰ����
 	mode_t mode 664 666 
 	chmod test 777
 	664
-	读写fifo 
+	��дfifo 
 	 open  write read 
-	一个进程以某种方式打开fifo 当前进程进入阻塞 
-	直到另外一个进程以另外一种方式打开fifo 此时阻塞返回
-	一个进程可以以可读可写的方式打开
+	һ��������ĳ�ַ�ʽ��fifo ��ǰ���̽������� 
+	ֱ������һ������������һ�ַ�ʽ��fifo ��ʱ��������
+	һ�����̿����Կɶ���д�ķ�ʽ��
 	
-	两个进程打开fifo ，阻塞读操作  -----read aio_read 
-	管道没有数据 就一直阻塞 
+	�������̴�fifo ������������  -----read aio_read 
+	�ܵ�û������ ��һֱ���� 
 	
-	写操作 但是fifo里面满了--->写阻塞 一直等到有人读 才能写入
-	fifo空间满了 
+	д���� ����fifo��������--->д���� һֱ�ȵ����˶� ����д��
+	fifo�ռ����� 
 	
-	一端是写操作，另外一段关闭了fifo ，写端进程会受到SIGPIPE信号 
-	一段是读，另外一端关闭了FIFO，读端不会阻塞 
+	һ����д����������һ�ιر���fifo ��д�˽��̻��ܵ�SIGPIPE�ź� 
+	һ���Ƕ�������һ�˹ر���FIFO�����˲������� 
 	
 	suid  ----
 	setuid() 
 	
-	管道是特殊文件  先入先出 不能定位
-	管道是单向 
-	阻塞问题 
+	�ܵ��������ļ�  �����ȳ� ���ܶ�λ
+	�ܵ��ǵ��� 
+	�������� 
 	
-	信号量  消息队列 共享内存 ------system V
+	�ź���  ��Ϣ���� �����ڴ� ------system V
 	
 	ipcs
 	ipcrm 
 	
 	key  ID
 	
-	Linux 为每个IPC机制都分配了ID
-	问：要通信的进程 如何获得IPC的ID值
-	答：在创建IPC的时候 就有ID值-----只对创建IPC的进程而言 
-	key值 
-	使用IPC进程互相约定key作为创建IPC的依据 
-	key能够随意指定么 
+	Linux Ϊÿ��IPC���ƶ�������ID
+	�ʣ�Ҫͨ�ŵĽ��� ��λ��IPC��IDֵ
+	���ڴ���IPC��ʱ�� ����IDֵ-----ֻ�Դ���IPC�Ľ��̶��� 
+	keyֵ 
+	ʹ��IPC���̻���Լ��key��Ϊ����IPC������ 
+	key�ܹ�����ָ��ô 
 	ftok
 	key_t ftok(const char *pathname, int proj_id);
-	const char *pathname  一般设定为当前目录 .  必须存在
+	const char *pathname  һ���趨Ϊ��ǰĿ¼ .  �������
 	/test/ ----
 	stat(/test/)------struct stat 
 	stat.st_dev
 	stat.ino
-	key  31-24 为proj_id的低8位
-		 23-16 为st_dev的低8位
-		 15-0  为ino的低16位
-	使用相同的文件路径 和 proj_id 得到的key是相同和唯一的-----创建IPC的时候 ID是相同的
-	所以能进行IPC通信 
+	key  31-24 Ϊproj_id�ĵ�8λ
+		 23-16 Ϊst_dev�ĵ�8λ
+		 15-0  Ϊino�ĵ�16λ
+	ʹ����ͬ���ļ�·�� �� proj_id �õ���key����ͬ��Ψһ��-----����IPC��ʱ�� ID����ͬ��
+	�����ܽ���IPCͨ�� 
 	
-消息队列：
+��Ϣ���У�
 	struct msqid_ds
-	默认情况下，Linux最多有16条消息队列
+	Ĭ������£�Linux�����16����Ϣ����
 	
-	创建消息队列 
-		int msgget(key_t k,int msgflg);  如果成功返回msg id
+	������Ϣ���� 
+		int msgget(key_t k,int msgflg);  ����ɹ�����msg id
 		msgflg       perm|777
-		IPC_CREAT|777   有就忽略  没有就创建
-		IPC_EXCL|777	如果key存在 则返回失败
-		IPC_NOWAIT|		非阻塞，如果需要阻塞则返回错误		
-	消息队列属性控制 
+		IPC_CREAT|777   �оͺ���  û�оʹ���
+		IPC_EXCL|777	���key���� �򷵻�ʧ��
+		IPC_NOWAIT|		�������������Ҫ�����򷵻ش���		
+	��Ϣ�������Կ��� 
 		int msgctl(int msqid,int cmd,struct msqid_ds *buf);
-			msqid指队列标识符;
-			动作码
-					IPC_STAT  获取消息队列的msqid_ds结构体
+			msqidָ���б�ʶ��;
+			������
+					IPC_STAT  ��ȡ��Ϣ���е�msqid_ds�ṹ��
 					IPC_SET	  msg.perm.uid  gid perm  mode
-							  2个进程执行  msgq创建者(uid==msg.perm.cuid)
+							  2������ִ��  msgq������(uid==msg.perm.cuid)
 										   root 
-					IPC_RMID  2个进程执行  (uid==msg.perm.cuid)(uid==msg.perm.uid)
+					IPC_RMID  2������ִ��  (uid==msg.perm.cuid)(uid==msg.perm.uid)
 											root
-	发送消息到消息队列 
+	������Ϣ����Ϣ���� 
 		int msgsnd(int msqid,const void *msg_ptr,size_t sz,int msgflg);
-		msg_ptr  指到用户发送消息的缓冲区
+		msg_ptr  ָ���û�������Ϣ�Ļ�����
 			struct msgbuf {
 				__kernel_long_t mtype;          /* type of message */
 				char mtext[1];                  /* message text */
 			};
-		mtype:表示消息类型 
-		mtext：真正的消息内容 
+		mtype:��ʾ��Ϣ���� 
+		mtext����������Ϣ���� 
 		
 		msgflg 		IPC_NOWAIT
-					0  则阻塞调用进程
-		成功发送返回值为0  
-				内核帮助做了以下操作：
+					0  ���������ý���
+		�ɹ����ͷ���ֵΪ0  
+				�ں˰����������²�����
 									msg_qnum++
-									msg_lspid 设置为发送进程的PID
-									msg_stime  设置为当前时间
-	从消息队列中接收消息
+									msg_lspid ����Ϊ���ͽ��̵�PID
+									msg_stime  ����Ϊ��ǰʱ��
+	����Ϣ�����н�����Ϣ
 	int msgrcv(int msqid,void *m_p,size_t sz,long int msgtype,int msgflg);
-	void *m_p  要读到的内存 
+	void *m_p  Ҫ�������ڴ� 
 			struct msgbuf {
 				__kernel_long_t mtype;          /* type of message */
 				char mtext[1];                  /* message text */
 			};
 	long int msgtype
-			msgtype==0 接收队列中的第一个消息 
-			msgtype>0  接收第一条与msgtype相同的消息
-			msgtype<0  等于或小于该值(绝对值)的第一个可用消息
-	msgflg   IPC_NOWAIT  如果消息队列中没有数据 ，则会立即返回-1 
-			 未设置IPC_NOWAIT 会一直阻塞 直到出现下面这些情况：
-				有消息放入消息队列 
-				msqid从系统中删除 ，返回-1 
-				接收到一个信号
+			msgtype==0 ���ն����еĵ�һ����Ϣ 
+			msgtype>0  ���յ�һ����msgtype��ͬ����Ϣ
+			msgtype<0  ���ڻ�С�ڸ�ֵ(����ֵ)�ĵ�һ��������Ϣ
+	msgflg   IPC_NOWAIT  �����Ϣ������û������ �������������-1 
+			 δ����IPC_NOWAIT ��һֱ���� ֱ������������Щ�����
+				����Ϣ������Ϣ���� 
+				msqid��ϵͳ��ɾ�� ������-1 
+				���յ�һ���ź�
 				
-	如果成功则消息会从消息队列中删除，并且返回读取的消息大小 
+	����ɹ�����Ϣ�����Ϣ������ɾ�������ҷ��ض�ȡ����Ϣ��С 
 					msg_qnum--
-					msg_lrpid 设置为接收进程的PID
-					msg_rtime  设置为当前时间
+					msg_lrpid ����Ϊ���ս��̵�PID
+					msg_rtime  ����Ϊ��ǰʱ��
 		
 				
 				
