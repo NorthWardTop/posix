@@ -39,7 +39,6 @@
    for ( i = 0 ; i < MAX_SEMAPHORES ; i++ ) 
    {
      printf("Semaphore %d, value %d\n", i, sem_read_array[i] );
-
    }
    /* Use GETVAL in a similar manner */
    for ( i = 0 ; i < MAX_SEMAPHORES ; i++ )
