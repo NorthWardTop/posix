@@ -1,0 +1,102 @@
+1.消息队列的方式  
+	ftok id 消息队列的操作函数  消息队列的对象  消息队列的demo
+	
+								信号量  
+无名信号量：								
+	sem_t sem_id
+	int sem_init(sem_t *sem, int pshared, unsigned int value);
+	pshared
+	int sem_getvalue(sem_t *sem, int *sval);
+	
+有名信号量 ：
+	sem_open
+	sem_close(mutex);
+	sem_unlink(SEM_NAME); 删除文件
+	
+	
+	文件--link---sem  
+	sem_unlink  ....必须当是最后一个使用该信号的进程或线程来进行 
+	
+	
+	count++----0
+	
+	semctl()
+		
+		
+	msqctl（IPC_MOID）
+	
+SYSTEM V 信号量：
+	对象：semid_ds
+	struct semid_ds {
+	 struct ipc_perm sem_perm; /* 信号量集的操作许可权限 */
+	 struct sem *sem_base; /* 某个信号量 sem 结构数组的指针，当前信号量集
+	 中的每个信号量对应其中一个数组元素 */
+	 ushort sem_nsems; /* sem_base 数组的个数 */
+	 time_t sem_otime; /* 最后一次成功修改信号量数组的时间 */
+	 time_t sem_ctime; /* 成功创建时间 */
+};
+
+	创建对象：int semget(key_t key, int nsems, int oflag)
+			ftok---key 
+			key----ID
+			ID-----semid_ds
+			
+	
+	设置对象：int semctl(int semid, int semum, int cmd, ../* union semun arg */);
+	 int semum 0-n
+	
+	IPC_RMID 
+	IPC_SET ipc_perm
+	IPC_STAT ipc_perm
+	IPC_INFO 
+	GETPID   获取信号量拥有者的pid值      0           无效
+	GETVAL	 获取某个信号量的值       信号量编号      无效        返回值为当前信号量的对应的值
+	GETALL	获取所有信号量的值            0        ushort *buf
+	GETNCNT 获取等待信号量的值递增的进程个数  0   	返回进程个数		
+	GETZCNT	获取等待信号量的值递减的进程个数  0	 返回进程个数
+	SETVAL	设置信号量的值 			信号量编号    	要设置的值
+	SETALL	设置所有信号的值		0   			ushort *buf
+			
+	使用对象：
+
+
+	int semop(int semid, struct sembuf *opsptr, size_t nops);
+	struct sembuf 
+	{
+		unsigned short  sem_num;	数组下标
+		short			sem_op;		操作码 
+		short			sem_flg;	/* operation flags */
+	};
+	sem_op	为正数 则表示在原来信号量的基础上+sem_op
+			为-    
+			0 		测试当前信号量的值是否为0 
+
+	对象
+	msgget
+	msgctl
+	msgsnd
+	msgrecv
+	
+	
+	
+	Linux 信号量机制 写一个有三个状态的状态机  并行状态机 
+	每一个状态为一个线程  
+	A---B---C--A--B---C 
+	
+周四 6点10分 周五的课 
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+

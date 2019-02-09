@@ -3,7 +3,7 @@
  * @Github: https://github.com/northwardtop
  * @Date: 2019-02-08 22:23:32
  * @LastEditors: northward
- * @LastEditTime: 2019-02-09 00:23:13
+ * @LastEditTime: 2019-02-09 16:03:37
  * @Description: 测试线程间无名信号量的通信
  */
 #include <stdio.h>
@@ -44,9 +44,9 @@ void* thread2(void* arg)
     sem_post(&sem);//V
 }
 
-//无名用于相关进程或线程间的同步
+
 /**
- * @description: 
+ * @description: 无名用于相关进程或线程间的同步
  * @param {type} 
  * @return: 
  */
