@@ -1,12 +1,11 @@
 /*
  * @Author: northward
  * @Github: https://github.com/northwardtop
- * @Date: 2019-02-09 20:56:15
+ * @Date: 2019-02-10 12:05:29
  * @LastEditors: northward
- * @LastEditTime: 2019-02-12 22:32:41
- * @Description: 利用system V的信号量来控制临界资源共享内存shm
+ * @LastEditTime: 2019-02-12 22:32:29
+ * @Description: 共享内存接收端, 有名信号量实现互斥
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -16,18 +15,7 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include "myGeneral.h"
-/* Get shared memory segment.  */
-//extern int shmget (key_t __key, size_t __size, int __shmflg) __THROW;
-//flg:IPC_CREAT|IPC_EXCL|SHM_W|SH_R
-// shmctl(),SHM_LOCK:锁定共享内存段,SHM_UNLOCK,第二个人锁定将被阻塞
-// shmat(id,0(系统指定)非0为指定地址,SHM_RDONLY|RND|),映射到用户空间,
-// shmdt(取消映射的地址) == free
 
-/**
- * @description: 主函数
- * @param {type} 
- * @return: 
- */
 int main(int argc, char const *argv[])
 {
     int ret;
@@ -45,7 +33,7 @@ int main(int argc, char const *argv[])
     //获取一个信号量,为了简单,使用系统的key,设置一个信号量
 
     //分配sem对象
-    sem_id = semget((key_t)6666, 1, IPC_CREAT | 0666);
+    sem_id = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666);
     if (sem_id < 0)
         handle_error("Use system V semget failed");
     //设置sem对象
@@ -58,7 +46,7 @@ int main(int argc, char const *argv[])
             handle_error("Sem removal failed");
     }
 
-    
+
 
     //分配一段共享内存,仅仅自己读写
     shm_id = shmget((key_t)6666, (size_t)getpagesize, IPC_CREAT | 0600);
@@ -72,24 +60,28 @@ int main(int argc, char const *argv[])
     while (1)
     {
         sem_val=semctl(sem_id, 0, GETVAL);
-        if(sem_val==0)
-        {
-            printf("Please enter the information to send:\n");
-            fflush(stdout);
-            scanf("%s", (char*)pshm);//输入内容直接写入到共享内存的指针
-            sem_b.sem_op=1;//正整数加到上val
-            ret=semop(sem_id, &sem_b, 1);
-            if(ret<0)
-                handle_error("semop failed");
-            if(strcmp(pshm,"q")==0)
-                break;
-        }
-        
+        if(sem_val!=0)
+            continue;
+        printf("get message:\n");
+        fflush(stdout);
+        printf("%s", (char*)pshm);//共享内存的指针读出来
+        sem_b.sem_op=-1;//从1到0,直到send去+1
+        ret=semop(sem_id, &sem_b, 1);
+        if(ret<0)
+            handle_error("semop failed");
+        if(strcmp(pshm,"q")==0)
+            break;
     }
     ret=shmdt(pshm);
     if(ret<0)
         handle_error("detache share memory failed");
-    
-    
+
+    //销毁信号量和共享内存
+    ret=shmctl(shm_id, IPC_RMID, NULL);
+    if(ret<0)
+        handle_error("Remove share memory failed");
+    ret=semctl(sem_id, 0, IPC_RMID);
+    if(ret<0)
+        handle_error("Remove sem failed");
     return 0;
 }
