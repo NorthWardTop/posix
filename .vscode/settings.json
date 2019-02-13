@@ -2,6 +2,9 @@
     "files.associations": {
         "common.h": "c",
         "types.h": "c",
-        "ratio": "c"
+        "ratio": "c",
+        "wait.h": "c",
+        "unistd.h": "c",
+        "iosfwd": "c"
     }
 }
