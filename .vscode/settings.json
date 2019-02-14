@@ -6,6 +6,7 @@
         "wait.h": "c",
         "unistd.h": "c",
         "iosfwd": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "list.h": "c"
     }
 }

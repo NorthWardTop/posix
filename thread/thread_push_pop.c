@@ -3,7 +3,7 @@
  * @Github: https://github.com/northwardtop
  * @Date: 2019-02-14 17:23:01
  * @LastEditors: northward
- * @LastEditTime: 2019-02-14 18:38:12
+ * @LastEditTime: 2019-02-14 19:23:57
  * @Description: 测试线程启动时压入清理函数, 
  * 在线程退出时候弹出清理函数, 类似于析构函数
  * 结果, 没有太整明白怎么释放资源的
@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <list.h>
 
 /**
  * @description: 线程清理函数, 类似于析构函数
@@ -43,6 +44,7 @@ void* thread_fun(void* arg)
     pthread_cleanup_pop(1);
     printf("thread end\n");
 }
+
 
 int main(int argc, char const *argv[])
 {
