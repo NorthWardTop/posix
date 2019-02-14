@@ -5,6 +5,7 @@
         "ratio": "c",
         "wait.h": "c",
         "unistd.h": "c",
-        "iosfwd": "c"
+        "iosfwd": "c",
+        "pthread.h": "c"
     }
 }
