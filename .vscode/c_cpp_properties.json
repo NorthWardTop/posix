@@ -4,9 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "D:/Program Files/VC/include/LinuxInclude/x86_64-linux-gnu",
-                "D:/Program Files/VC/include/LinuxInclude",
-                "D:/Program Files/VC/include"
+                "F:/SI/pak/include/**"
             ],
             "defines": [
                 "_DEBUG",

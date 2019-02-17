@@ -1,0 +1,12 @@
+---- radio_recv_state Matches (11 in 1 files) ----
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):static int radio_recv_state = 0;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):        switch (radio_recv_state)
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):                radio_recv_state = RADIO_RECV_HEAD2;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):                radio_recv_state = RADIO_RECV_LEN;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):                radio_recv_state = RADIO_RECV_HEAD1;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):            radio_recv_state = RADIO_RECV_CNT;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):            radio_recv_state = RADIO_RECV_SYSID;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):                radio_recv_state = RADIO_RECV_TYPE;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):            radio_recv_state = RADIO_RECV_DATA;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):                radio_recv_state = RADIO_RECV_CHECKSUM;
+Digitalradio.c (f:\linux-lec\代码\serial\linux_serial-master\sources):                radio_recv_state = 0;

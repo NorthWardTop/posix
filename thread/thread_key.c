@@ -30,12 +30,22 @@ typedef struct _Private_Data
     int y;
 } private_data_t;
 
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ */
 void main_thread(void *key)
 {
     printf("this is my main thread, thread id: %lu, my private data is: %d\n",
            pthread_self(), ((private_data_t *)key)->x);
 }
 
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ */
 void *child_thread1(void *arg)
 {
     private_data_t setval;
@@ -52,6 +62,11 @@ void *child_thread1(void *arg)
         ((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
 }
 
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ */
 void *child_thread2(void *arg)
 {
     private_data_t setval;
@@ -68,6 +83,11 @@ void *child_thread2(void *arg)
         ((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
 }
 
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ */
 int main(int argc, char const *argv[])
 {
     pthread_key_t key; //创建一个私有数据变量
