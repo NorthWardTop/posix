@@ -31,16 +31,7 @@ typedef struct _Private_Data
 	int y;
 } private_data_t;
 
-/**
- * @description:
- * @param {type}
- * @return:
- */
-void main_thread(void *key)
-{
-	printf("this is my main thread, thread id: %lu, my private data is: %d\n",
-		pthread_self(), ((private_data_t *)key)->x);
-}
+void main_thread(void *key);
 
 /**
  * @description:
@@ -54,13 +45,9 @@ void *child_thread1(void *arg)
 	setval.y = 55;
 
 	printf("child thread 1, setting key 55\n");
-	printf("before change key: %d, %d\n", \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->x, \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
+	printf("before change key: %d\n", *(int*)pthread_getspecific(*(pthread_key_t*)arg));
 	pthread_setspecific(*(pthread_key_t *)arg, &(setval.x)); //设置值为55
-	printf("before change key: %d, %d\n", \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->x, \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
+	printf("before change key: %d\n", ((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->x);
 }
 
 /**
@@ -75,13 +62,9 @@ void *child_thread2(void *arg)
 	setval.y = 66;
 
 	printf("child thread 2, setting key 66\n");
-	printf("before change key: %d, %d\n", \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->x, \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
+	printf("before change key: %d\n", ((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
 	pthread_setspecific(*(pthread_key_t *)arg, &(setval.x)); //设置值为66
-	printf("before change key: %d, %d\n", \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->x, \
-		((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
+	printf("before change key: %dn", ((private_data_t *)pthread_getspecific(*(pthread_key_t*)arg))->y);
 }
 
 /**
@@ -98,14 +81,24 @@ int main(int argc, char const *argv[])
 	test.y = 2;
 	//创建主线程
 	pthread_key_create(&key, main_thread);
-	pthread_setspecific(key, &test); //修改key为自定义数据
+	//pthread_setspecific(key, &test); //修改key为自定义数据
 	//创建两个子线程
 	pthread_create(&tid1, NULL, child_thread1, (pthread_key_t*)&key);
-	pthread_create(&tid2, NULL, child_thread2, (pthread_key_t*)&key);
+//	pthread_create(&tid2, NULL, child_thread2, (pthread_key_t*)&key);
 	pthread_join(tid1, NULL);
-	pthread_join(tid2, NULL);
+//	pthread_join(tid2, NULL);
 	pthread_key_delete(key);
 
 	return 0;
 }
 
+/**
+ * @description:
+ * @param {type}
+ * @return:
+ */
+void main_thread(void *key)
+{
+	printf("this is my main thread, thread id: %lu, my private data is: %d\n",
+		pthread_self(), ((private_data_t *)key)->x);
+}
