@@ -1,5 +1,5 @@
-/*
-读写锁
+/*互斥锁,读写锁,条件锁
+读写锁(允许读读并发, 不允许读写或写写并发,
 	1.初始化销毁pthread_rwlock_t
 	int pthread_rwlock_destroy(pthread_rwlock_t *rwlock);
 	int pthread_rwlock_init(pthread_rwlock_t *restrict rwlock,
@@ -18,10 +18,12 @@
 */
 
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <pthreadtypes.h>
+
 
 #define BUF_SIZE	1024
 #define THREAD_NUM	4
@@ -36,7 +38,10 @@ int main(int argc, const char* argv[])
 	int ret=-1;
 	char buf[BUF_SIZE] = "\0";
 	pthread_t tid[THREAD_NUM] = { -1 };
+	pthread_rwlock_t rwlock;
+	//线程返回值
 	void* thrd_ret[THREAD_NUM] = { NULL };
+	//线程执行函数指针数组
 	void* (*thread_func_arr[THREAD_NUM])(void* arg) =
 	{
 		thread_one,
@@ -46,7 +51,7 @@ int main(int argc, const char* argv[])
 	};
 	for (int i = 0; i < THREAD_NUM; ++i)
 	{
-		ret = pthread_create(&tid[i], NULL, thread_func_arr[i], NULL);
+		ret = pthread_create(&tid[i], NULL, thread_func_arr[i], &rwlock);
 		if (ret < 0)
 			perror("thread create failed!\n");
 	}
@@ -54,11 +59,16 @@ int main(int argc, const char* argv[])
 	for (int i = 0; i < THREAD_NUM; ++i)
 		pthread_join(tid[i], &thrd_ret);
 
+
+	pthread_rwlock_destroy(&rwlock);
 	return 0;
 }
 
 void * thread_one(void * arg)
 {
+	pthread_rwlock_t rwlock = *(pthread_rwlock_t*)arg;
+
+
 	return NULL;
 }
 
