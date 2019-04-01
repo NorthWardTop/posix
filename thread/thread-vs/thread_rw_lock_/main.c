@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <sys/types.h>
-#include <pthreadtypes.h>
+#include <pthread.h>
 
 
 #define BUF_SIZE	1024
