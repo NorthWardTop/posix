@@ -47,7 +47,7 @@ void* thread_func(void* arg)
 	signal(SIGUSR1, handle_usr1);
 	int* ret = (int*)malloc(sizeof(int));
 	*ret = 1111;
-	sleep(2);
+	sleep(5);
 	pthread_exit(ret);
 	return NULL;
 }
@@ -58,14 +58,16 @@ void* thread_func2(void* arg)
 {
 	printf("thread_func2: I am %lu thread, I will not receive signal from main thread!\n", pthread_self());
 	//SIGUSR1
-	signal(SIGUSR2, handle_usr1);
+	
 	sigset_t set;
 	sigfillset(&set);
 	sigdelset(&set, SIGUSR2);
 	pthread_sigmask(SIG_SETMASK, &set, NULL);
+
+	signal(SIGUSR2, SIG_IGN);
 	int* ret = (int*)malloc(sizeof(int));
 	*ret = 2222;
-	sleep(3);
+	sleep(5);
 	pthread_exit(ret);
 	return NULL;
 }
@@ -94,11 +96,11 @@ int main(int argc, const char* argv[])
 	if (pthread_kill(tid2, SIGUSR2) != 0)
 		perror("send SIGUSR2 failed!\n");
 
-	sleep(5);
+	sleep(2);
 	pthread_join(tid, (void**)&pret);
 	printf("thread1 return %d\n", *pret);
 	pthread_join(tid2, (void**)&pret);
-	printf("thread1 return %d\n", *pret);
+	printf("thread2 return %d\n", *pret);
 	
 	if(pret)
 		free(pret);
