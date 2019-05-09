@@ -7,6 +7,9 @@
         "unistd.h": "c",
         "iosfwd": "c",
         "pthread.h": "c",
-        "list.h": "c"
-    }
+        "list.h": "c",
+        "kernel.h": "c",
+        "module.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }
