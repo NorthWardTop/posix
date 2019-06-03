@@ -331,21 +331,22 @@ static void *tp_work_thread(void *pthread){
         //检查是不是需要退出
 		if(thread->need_exit){
             printf("pthread %lu  will exit.....\n",pid);
-			pthread_mutex_unlock(&thread->thread_lock);
+			pthread_mutex_unlock(&thread->thread_lock);//销毁前解锁线程
 			destory_thread(thread);
 			this->cur_th_num--;
 			this->idle_th_num--;
 			return;
 		}
-		pthread_mutex_unlock(&thread->thread_lock);
 		
+		pthread_mutex_unlock(&thread->thread_lock);
+		//保存当前线程的工作函数和参数
 		printf("%lu thread do work!\n", pid);
 		tp_work *work = thread->th_work;
 		tp_work_arg *arg = thread->th_arg;
 
 
 		work->process_job(arg);
-
+		//销毁线程参数
 		free(arg);
 
 
@@ -356,7 +357,7 @@ static void *tp_work_thread(void *pthread){
 		pthread_mutex_unlock(&thread->thread_lock);
 		
 		printf("%lu do work over\n", pid);
-	}	
+	}
 }
 
 /**
@@ -398,9 +399,10 @@ void *tp_manage_thread(void *pool_this){
     //线程池的最小值
 	int min;
     tp_thread_info*thread_info;
-
+	//获取线程池对象
     tp_thread_pool *this = (tp_thread_pool*)pool_this;
 	while(1){
+		//每轮设置线程数的属性
 		cur = this->cur_th_num;
 		idle = this->idle_th_num;
 		min = this->min_th_num;
@@ -425,15 +427,18 @@ void *tp_manage_thread(void *pool_this){
         printf("*****************************************\n");
         //跳过第一个
 	    for(thread_info = this->thread_info->next;thread_info!=NULL&&exit_num>0;thread_info = thread_info->next){
-            pthread_mutex_lock(&thread_info->thread_lock);
-             //当前线程是否空闲
+            //对线程进行上锁,
+			pthread_mutex_lock(&thread_info->thread_lock);
+             //当前线程是否空闲, 上锁可以防止读时候被修改
 			if(thread_info->status != 2){
                 pthread_mutex_unlock(&thread_info->thread_lock);
 				continue;
 			}
+			//?为什么线程直接需要退出, 不用判断吗
 			thread_info->need_exit = 1;
+			//?为什么要解锁两遍
             pthread_mutex_unlock(&thread_info->thread_lock);
-			exit_num--;
+			exit_num--; //
 			pthread_cond_signal(&thread_info->thread_cond);
 		}
 		
