@@ -13,7 +13,7 @@ void *child_work(void *ptr)
 	//将要修改本线程节点, 上锁线程
 	/*modify the tid attribute the first time exec */
 	pthread_mutex_lock(&self->mutex);
-
+	//可有可无
 	self->tid = syscall(SYS_gettid);
 
 	pthread_mutex_unlock(&self->mutex);
@@ -28,6 +28,7 @@ void *child_work(void *ptr)
 		{//没有任务的线程将在这里停止/休眠
 			pthread_cond_wait(&self->cond, &self->mutex);
 		}
+		//线程已经处于唤醒状态
 		//如果没有被停止, 则说明有任务, 首先上锁任务, 防止其他线程抢任务
 		pthread_mutex_lock(&self->work->mutex);
 		//执行这个任务
@@ -35,13 +36,13 @@ void *child_work(void *ptr)
 		self->work->fun(self->work->arg);
 		//完成任务后清理任务
 		/*after finished the work */
-		self->work->fun = NULL;
+		self->work->fun = NULL;//回去睡眠
 		self->work->flag = 0;
 		self->work->tid = 0;
 		self->work->next = NULL;
-
+		//按顺序释放线程参数空间,最好使用pthread_clean
 		free(self->work->arg);
-
+		//解锁和销毁任务锁
 		pthread_mutex_unlock(&self->work->mutex); // unlock the task
 		pthread_mutex_destroy(&self->work->mutex);
 
@@ -251,7 +252,7 @@ void init_system(void)
  *ptr:no used ,in order to avoid warning.
  *return :nothing.
  */
-
+//
 void *thread_manager(void *ptr)
 {
 	while (1)
@@ -263,23 +264,25 @@ void *thread_manager(void *ptr)
 		 *get a new task, and modify the task_queue.
 		 *if no task block om task_queue_head->cond.
 		 */
+		//锁定任务队列,等待
 		pthread_mutex_lock(&task_queue_head->mutex);
-
+		//如果任务队列没有任务就条件等待(管理线程阻塞)
 		if (task_queue_head->number == 0)
 			pthread_cond_wait(&task_queue_head->cond, &task_queue_head->mutex);
-
+		//如果不阻塞就有任务,获得任务队列第一个任务
 		temp_task = task_queue_head->head;
 		task_queue_head->head = task_queue_head->head->next;
 		task_queue_head->number--;
-
+		//取完任务后解锁队列
 		pthread_mutex_unlock(&task_queue_head->mutex);
 
 		/*
 		 *get a new idle thread, and modify the idle_queue.
 		 *if no idle thread, block on pthread_queue_idle->cond.
 		 */
+		//锁定空闲线程队列
 		pthread_mutex_lock(&pthread_queue_idle->mutex);
-
+		//没有空闲队列管理线程就阻塞
 		if (pthread_queue_idle->number == 0)
 			pthread_cond_wait(&pthread_queue_idle->cond, &pthread_queue_idle->mutex);
 
@@ -464,7 +467,8 @@ clean:
  *ptr: no used. just avoid warning.
  *return:nothing.
  */
-
+//如果有新的连接到达,创建新的任务节点,将sockfd作为参数传递给任务节点
+//网络编程三步走socket->sockaddr_in->bind->listen
 void *task_manager(void *ptr)
 {
 	int listen_fd;
@@ -474,11 +478,11 @@ void *task_manager(void *ptr)
 		perror("socket");
 		goto clean;
 	}
-
+	//用于socket ioctl的接口请求结构
 	struct ifreq ifr;
-
+	//设置设备名称
 	strcpy(ifr.ifr_name, "eth0");
-
+	//获得ip,给ifr
 	if (ioctl(listen_fd, SIOCGIFADDR, &ifr) < 0)
 	{
 		perror("ioctl");
@@ -486,18 +490,18 @@ void *task_manager(void *ptr)
 	}
 
 	struct sockaddr_in myaddr;
-
+	//设置sockaddr_in对象三语句
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_port = htons(PORT);
 	myaddr.sin_addr.s_addr =
 		((struct sockaddr_in *)&(ifr.ifr_addr))->sin_addr.s_addr;
-
+	//绑定
 	if (-1 == bind(listen_fd, (struct sockaddr *)&myaddr, sizeof(myaddr)))
 	{
 		perror("bind");
 		goto clean;
 	}
-
+	//最多监听5个
 	if (-1 == listen(listen_fd, 5))
 	{
 		perror("listen");
@@ -511,7 +515,7 @@ void *task_manager(void *ptr)
 		int newfd;
 		struct sockaddr_in client;
 		socklen_t len = sizeof(client);
-
+		//没有新连接将阻塞
 		if (-1 == (newfd = accept(listen_fd, (struct sockaddr *)&client, &len)))
 		{
 			perror("accept");
@@ -529,39 +533,43 @@ void *task_manager(void *ptr)
 		 *initial the attribute of the task.
 		 *because this task havn't add to system,so,no need lock the mutex.
 		 */
-
+		//没有加入到任务队列,无需锁定互斥锁,这里参数空间设置为宏最好
 		newtask->arg = (void *)malloc(128);
 
 		memset(newtask->arg, '\0', 128);
+		//将accept到的fd传递给任务(线程)参数
 		sprintf(newtask->arg, "%d", newfd);
-
+		//线程函数指针指向执行函数
 		newtask->fun = prcoess_client;
 		newtask->tid = 0;
 		newtask->work_id = i;
 		newtask->next = NULL;
+		//初始化互斥锁
 		pthread_mutex_init(&newtask->mutex, NULL);
-
+		//加入到队列前锁定队列
 		/*add new task to task_link */
 		pthread_mutex_lock(&task_queue_head->mutex);
 
 		/*find the tail of the task link and add the new one to tail */
 		temp = task_queue_head->head;
-
+		//头为空就直接放在头上
 		if (temp == NULL)
 		{
 			task_queue_head->head = newtask;
 		}
 		else
 		{
+			//移动到空尾巴
 			while (temp->next != NULL)
 				temp = temp->next;
-
+			//追加
 			temp->next = newtask;
 		}
 		task_queue_head->number++;
-
+		//解锁队列
 		pthread_mutex_unlock(&task_queue_head->mutex);
 
+		//当任务队列空时,管理线程在任务队列阻塞,唤醒任务队列的管理线程
 		/*signal the manager thread , no task coming */
 		pthread_cond_signal(&task_queue_head->cond);
 	}
