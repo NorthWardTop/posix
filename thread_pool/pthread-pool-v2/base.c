@@ -213,6 +213,7 @@ void create_pthread_pool(void)
 /*
  *init_system :init the system glob pointor.
  */
+//对各个队列和队列条件变量和互斥锁的初始化
 void init_system(void)
 {
 	/*init the pthread_queue_idle */
@@ -285,9 +286,9 @@ void *thread_manager(void *ptr)
 		//没有空闲队列管理线程就阻塞
 		if (pthread_queue_idle->number == 0)
 			pthread_cond_wait(&pthread_queue_idle->cond, &pthread_queue_idle->mutex);
-
+		//如果不阻塞管理线程不阻塞,说明空闲队列线程有线程,取出第一个线程
 		temp_thread = pthread_queue_idle->head;
-
+		//如果使用的是最后一个空闲线程,置空队列指针
 		/*if this is the last idle thread ,modiry the head and rear pointor */
 		if (pthread_queue_idle->head == pthread_queue_idle->rear)
 		{
@@ -295,16 +296,17 @@ void *thread_manager(void *ptr)
 			pthread_queue_idle->rear = NULL;
 		}
 		/*if idle thread number>2, get the first one,modify the head pointor  */
+		//否则就后移,如果最后一个节点后移,将访问到空指针
 		else
 		{
 			pthread_queue_idle->head = pthread_queue_idle->head->next;
-			pthread_queue_idle->head->prev = NULL;
+			pthread_queue_idle->head->prev = NULL; //head变化后向前的指针置空, NULL<-2
 		}
 
 		pthread_queue_idle->number--;
-
+		//空闲线程队列解锁
 		pthread_mutex_unlock(&pthread_queue_idle->mutex);
-
+		//以上已经获得线程,开始从修改任务属性,占用本任务
 		/*modify the  task attribute. */
 		pthread_mutex_lock(&temp_task->mutex);
 
@@ -313,7 +315,7 @@ void *thread_manager(void *ptr)
 		temp_task->flag = 1;
 
 		pthread_mutex_unlock(&temp_task->mutex);
-
+		//以上线程和任务都已经就绪,最后一步将任务和线程结合
 		/*modify the idle thread attribute. */
 		pthread_mutex_lock(&temp_thread->mutex);
 
@@ -324,28 +326,33 @@ void *thread_manager(void *ptr)
 
 		pthread_mutex_unlock(&temp_thread->mutex);
 
+		//添加到忙线程队列
 		/*add the thread assinged task to the busy queue. */
 		pthread_mutex_lock(&pthread_queue_busy->mutex);
 
 		/*if this is the first one in busy queue */
 		if (pthread_queue_busy->head == NULL)
 		{
+			//忙线程队列为空时,只有这一个节点,前后指针都指向它
 			pthread_queue_busy->head = temp_thread;
 			pthread_queue_busy->rear = temp_thread;
+			//当前线程节点的前后都指向空
 			temp_thread->prev = temp_thread->next = NULL;
 		}
 		else
 		{
 			/*insert in thre front of the queue */
+			//头插
 			pthread_queue_busy->head->prev = temp_thread;
-			temp_thread->prev = NULL;
-			temp_thread->next = pthread_queue_busy->head;
-			pthread_queue_busy->head = temp_thread;
+			temp_thread->prev = NULL;//当前头置空
+			temp_thread->next = pthread_queue_busy->head;//向下为原头结点
+			pthread_queue_busy->head = temp_thread;//重置真头
 			pthread_queue_busy->number++;
 		}
 		pthread_mutex_unlock(&pthread_queue_busy->mutex);
 
 		/*signal the child thread to exec the work */
+		//通知这个被阻塞的线程去执行
 		pthread_cond_signal(&temp_thread->cond);
 	}
 }
