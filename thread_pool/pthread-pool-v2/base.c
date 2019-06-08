@@ -609,6 +609,7 @@ void *monitor(void *ptr)
 		pthread_mutex_lock(&pthread_queue_busy->mutex);
 
 		/*output the busy thread works one by one */
+		//一个一个去查看当前工作
 		temp_thread = pthread_queue_busy->head;
 
 		printf("\n*******************************\n");
