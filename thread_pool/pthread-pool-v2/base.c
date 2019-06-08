@@ -362,6 +362,8 @@ void *thread_manager(void *ptr)
  *ptr: the fd come from listen thread that can communicate to the client.
  *return:nothing. void * only used to avoid waring.
  */
+//处理已经连接的客户端,在任务管理线程中绑定
+//发送文件或者文件属性
 void *prcoess_client(void *ptr)
 {
 	int net_fd;
@@ -380,10 +382,11 @@ void *prcoess_client(void *ptr)
 	}
 
 	/* if the client requre the attribute of one file. */
+	//如果是请求当前文件属性
 	if (client_info.flag == 1)
 	{
 		struct stat mystat;
-		if (-1 == stat(client_info.buf, &mystat))
+		if (-1 == stat(client_info.buf, &mystat))//获得文件状态
 		{
 			printf("stat %s error\n", client_info.buf);
 			close(net_fd);
@@ -407,8 +410,7 @@ void *prcoess_client(void *ptr)
 		close(net_fd);
 		return;
 	}
-
-	else
+	else//如果是请求文件
 	{
 		int local_begin =
 			ntohl(client_info.local_begin);		/* the content begining location. */
@@ -424,12 +426,13 @@ void *prcoess_client(void *ptr)
 		}
 
 		/*seek the read local to the real location. */
+		//将文件起始位置给local_begin
 		lseek(file_fd, local_begin, SEEK_SET);
 
 		int need_send = length;
 		int ret;
 
-		do
+		do //去读取从local_begin开始,大小为length长度的文件内容
 		{
 			char buf[1024];
 
@@ -437,6 +440,7 @@ void *prcoess_client(void *ptr)
 
 			/*read 1024bytes from file everytome, if the last one,read the real
 			 * length. */
+			//每次最多读取1024,循环读取
 			if (need_send < 1024)
 				ret = read(file_fd, buf, need_send);
 			else
@@ -451,6 +455,7 @@ void *prcoess_client(void *ptr)
 			}
 
 			/*send the data to client. */
+			//发送数据包
 			if (-1 == send(net_fd, buf, ret, 0))
 			{
 				printf("send file %s error\n", client_info.buf);
