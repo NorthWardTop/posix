@@ -10,10 +10,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+
 int main(int argc,char *argv[])
 {
+	if (argc < 4) {
+		printf("argc error\n");
+	}
 	int client_fd;
-		
+
 	if(-1==(client_fd=socket(AF_INET,SOCK_STREAM,0)))
 	{
 		perror("socket");exit(EXIT_FAILURE);
@@ -21,8 +25,8 @@ int main(int argc,char *argv[])
 	
 	struct  sockaddr_in server_addr;
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(atoi(argv[1]));
-	server_addr.sin_addr.s_addr = inet_addr("10.34.130.31");
+	server_addr.sin_port = htons(atoi(argv[1])); //端口
+	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	
 	if(-1 == connect(client_fd,(struct sockaddr *)&server_addr,sizeof(server_addr)))
 	{
@@ -38,9 +42,9 @@ int main(int argc,char *argv[])
 	};
 	
 	struct info sendinfo;
-	
+	//测试获取文件属性stat
 	sendinfo.flag = 1;
-	sprintf(sendinfo.buf,"%s",argv[2]);
+	sprintf(sendinfo.buf,"%s",argv[2]); //需要获取的文件名
 	
 	if(-1 == send(client_fd,&sendinfo, sizeof(sendinfo),0))
 	{
@@ -52,7 +56,7 @@ int main(int argc,char *argv[])
 	if(-1 == recv(client_fd,buf,1024,0))
 	{
 		perror("recv");exit(EXIT_FAILURE);
-	}	
+	}
 	
 	close(client_fd);
 	if(-1==(client_fd=socket(AF_INET,SOCK_STREAM,0)))

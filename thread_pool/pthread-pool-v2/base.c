@@ -408,7 +408,7 @@ void *prcoess_client(void *ptr)
 		}
 
 		close(net_fd);
-		return;
+		return NULL;
 	}
 	else//如果是请求文件
 	{
@@ -451,7 +451,7 @@ void *prcoess_client(void *ptr)
 				printf("read file %s error\n", client_info.buf);
 				close(net_fd);
 				close(file_fd);
-				return;
+				return NULL;
 			}
 
 			/*send the data to client. */
@@ -461,14 +461,14 @@ void *prcoess_client(void *ptr)
 				printf("send file %s error\n", client_info.buf);
 				close(net_fd);
 				close(file_fd);
-				return;
+				return NULL;
 			}
 		} while (ret > 0);
 
 		close(net_fd);
 		close(file_fd);
 	}
-	return;
+	return NULL;
 
 clean:
 	sys_clean();
@@ -493,7 +493,7 @@ void *task_manager(void *ptr)
 	//用于socket ioctl的接口请求结构
 	struct ifreq ifr;
 	//设置设备名称
-	strcpy(ifr.ifr_name, "eth0");
+	strcpy(ifr.ifr_name, "lo");
 	//获得ip,给ifr
 	if (ioctl(listen_fd, SIOCGIFADDR, &ifr) < 0)
 	{
@@ -510,7 +510,7 @@ void *task_manager(void *ptr)
 	//绑定
 	if (-1 == bind(listen_fd, (struct sockaddr *)&myaddr, sizeof(myaddr)))
 	{
-		perror("bind");
+		perror("bind..");
 		goto clean;
 	}
 	//最多监听5个
@@ -527,12 +527,14 @@ void *task_manager(void *ptr)
 		int newfd;
 		struct sockaddr_in client;
 		socklen_t len = sizeof(client);
+		printf("accepted\n");
 		//没有新连接将阻塞
 		if (-1 == (newfd = accept(listen_fd, (struct sockaddr *)&client, &len)))
 		{
 			perror("accept");
 			goto clean;
 		}
+		printf("accepted\n");
 
 		TASK_NODE *temp = NULL;
 		TASK_NODE *newtask = (TASK_NODE *)malloc(sizeof(TASK_NODE));
@@ -586,7 +588,7 @@ void *task_manager(void *ptr)
 		pthread_cond_signal(&task_queue_head->cond);
 	}
 
-	return;
+	return NULL;
 
 clean:
 	sys_clean();
@@ -612,21 +614,21 @@ void *monitor(void *ptr)
 		//一个一个去查看当前工作
 		temp_thread = pthread_queue_busy->head;
 
-		printf("\n*******************************\n");
+		printf("\n*******************************--\n");
 		while (temp_thread)
 		{
 			printf("thread %ld is  execute work_number %d\n", temp_thread->tid,
 				   temp_thread->work->work_id);
 			temp_thread = temp_thread->next;
 		}
-		printf("*******************************\n\n");
+		printf("*******************************++\n\n");
 
 		pthread_mutex_unlock(&pthread_queue_busy->mutex);
 
 		sleep(10);
 	}
 
-	return;
+	return NULL;
 }
 
 /*

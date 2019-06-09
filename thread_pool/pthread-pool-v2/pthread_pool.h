@@ -39,7 +39,8 @@ typedef struct task_node
   struct task_node *next;        
   pthread_mutex_t mutex;        /* when modify this ds and exec the work,lock the task ds. */
 } TASK_NODE;
-
+
+
 /*
 *the ds  of the task_queue
 */ 
@@ -50,7 +51,8 @@ typedef struct task_queue
   struct task_node *head;       /* point to the task_link. */
   int number;                   /* current number of task, include unassinged and assigned but no finished. */
 } TASK_QUEUE_T;
-
+
+
 /*
 *the ds of every thread, make all thread in a double link queue.
 */ 
@@ -62,8 +64,10 @@ typedef struct pthread_node
   struct pthread_node *next;
   struct pthread_node *prev;
   pthread_cond_t cond;        /* when assigned a task, signal this child thread by manager. */
-  pthread_mutex_t mutex; } THREAD_NODE;
-
+  pthread_mutex_t mutex; 
+} THREAD_NODE;
+
+
 /*
 *the ds of the thread queue
 */ 
@@ -73,8 +77,10 @@ typedef struct pthread_queue
   struct pthread_node *head;
   struct pthread_node *rear;
   pthread_cond_t cond;        /* when no idle thread, the manager wait for ,or when a thread return with idle, signal. */
-  pthread_mutex_t mutex; } PTHREAD_QUEUE_T;
-
+  pthread_mutex_t mutex; 
+} PTHREAD_QUEUE_T;
+
+
 /*
 * the ds of send msg between server and client.
 */ 
@@ -85,18 +91,29 @@ struct info
   int local_begin;              /* if get attribute, no used. */
   int length;                   /* if get attribute, no used. */
 };
-extern PTHREAD_QUEUE_T *pthread_queue_idle; /* the idle thread double link queue. */    
+
+
+extern PTHREAD_QUEUE_T *pthread_queue_idle; /* the idle thread double link queue. */    
 extern PTHREAD_QUEUE_T *pthread_queue_busy; /* the work thread double link queue. */
 extern TASK_QUEUE_T *task_queue_head;       /* the task queuee single link list. */
-void *child_work (void *ptr);
-void create_pthread_pool (void);
-void init_system (void);
-void *thread_manager (void *ptr);
-void *prcoess_client (void *ptr);
-void *task_manager (void *ptr);
-void *monitor (void *ptr);
-void sys_clean (void);
-
+
+void *child_work (void *ptr);
+
+void create_pthread_pool (void);
+
+void init_system (void);
+
+void *thread_manager (void *ptr);
+
+void *prcoess_client (void *ptr);
+
+void *task_manager (void *ptr);
+
+void *monitor (void *ptr);
+
+void sys_clean (void);
+
+
 #endif 
 
   
