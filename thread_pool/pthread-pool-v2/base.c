@@ -164,6 +164,7 @@ void *child_work(void *ptr)
  *when init, initial all the thread into a double link queue and all wait fo
  *self->cond.
  */
+//分配空闲线程池每个线程对象
 void create_pthread_pool(void)
 {
 	THREAD_NODE *temp =
@@ -177,7 +178,7 @@ void create_pthread_pool(void)
 
 	/*init as a double link queue */
 	int i;
-
+	//设置对象
 	for (i = 0; i < THREAD_DEF_NUM; i++)
 	{
 		temp[i].tid = i + 1;
