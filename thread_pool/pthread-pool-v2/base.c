@@ -80,21 +80,24 @@ void *child_work(void *ptr)
 			pthread_mutex_unlock(&task_queue_head->mutex);
 			//任务给线程派发完成,解锁线程??
 			pthread_mutex_unlock(&self->mutex);
-
+			//设置完任务直接返回去执行continue
 			continue;
 		}
-		else
+		else //任务队列头结点为空
 		{
 			/*no task need to exec, add self to idle queue and del from busy queue */
 			pthread_mutex_unlock(&task_queue_head->mutex);
 
+			//任务队列空,将忙队列上锁,从忙队列移动到
 			pthread_mutex_lock(&pthread_queue_busy->mutex);
 
 			/*self is the last execte thread */
 			if (pthread_queue_busy->head == self &&
 				pthread_queue_busy->rear == self)
 			{
+				//从队列摘除
 				pthread_queue_busy->head = pthread_queue_busy->rear = NULL;
+				//自己前后置空
 				self->next = self->prev = NULL;
 			}
 
@@ -102,9 +105,11 @@ void *child_work(void *ptr)
 			else if (pthread_queue_busy->head == self &&
 					 pthread_queue_busy->rear != self)
 			{
+				//头是下下一个
 				pthread_queue_busy->head = pthread_queue_busy->head->next;
+				//新头的上为NULL
 				pthread_queue_busy->head->prev = NULL;
-
+				//自己前后置空
 				self->next = self->prev = NULL;
 			}
 
@@ -112,22 +117,25 @@ void *child_work(void *ptr)
 			else if (pthread_queue_busy->head != self &&
 					 pthread_queue_busy->rear == self)
 			{
+				//尾巴变为尾巴的前一个
 				pthread_queue_busy->rear = pthread_queue_busy->rear->prev;
+				//新尾巴的下个为NULL
 				pthread_queue_busy->rear->next = NULL;
-
 				self->next = self->prev = NULL;
 			}
 
 			/*middle one */
 			else
 			{
-				self->next->prev = self->prev;
-				self->prev->next = self->next;
+				// 1-2-3
+				self->next->prev = self->prev;//3前向箭头向前跳一个
+				self->prev->next = self->next;//1后向箭头向后跳一个
 				self->next = self->prev = NULL;
 			}
 
+			//完成摘除忙队列的节点
 			pthread_mutex_unlock(&pthread_queue_busy->mutex);
-
+			//将自己添加到空闲队列
 			/*add self to the idle queue */
 			pthread_mutex_lock(&pthread_queue_idle->mutex);
 
@@ -138,9 +146,9 @@ void *child_work(void *ptr)
 				pthread_queue_idle->head = pthread_queue_idle->rear = self;
 				self->next = self->prev = NULL;
 			}
-
 			else
 			{
+				//空闲队列不为空就放在队列头上
 				self->next = pthread_queue_idle->head;
 				self->prev = NULL;
 				self->next->prev = self;
@@ -148,12 +156,11 @@ void *child_work(void *ptr)
 				pthread_queue_idle->head = self;
 				pthread_queue_idle->number++;
 			}
-
+			//释放空闲队列,释放自己(已经空闲)
 			pthread_mutex_unlock(&pthread_queue_idle->mutex);
-
 			pthread_mutex_unlock(&self->mutex);
 
-			/*signal have idle thread */
+			/*signal have idle thread *///激活空闲线程(如果有任务在等待)
 			pthread_cond_signal(&pthread_queue_idle->cond);
 		}
 	}
