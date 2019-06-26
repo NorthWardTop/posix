@@ -90,7 +90,7 @@ void *child_work(void *ptr)
 
 			//任务队列空,将忙队列上锁,从忙队列移动到
 			pthread_mutex_lock(&pthread_queue_busy->mutex);
-
+			//忙队列只有一个节点
 			/*self is the last execte thread */
 			if (pthread_queue_busy->head == self &&
 				pthread_queue_busy->rear == self)
@@ -100,7 +100,7 @@ void *child_work(void *ptr)
 				//自己前后置空
 				self->next = self->prev = NULL;
 			}
-
+			//本节点在头上
 			/*the first one thread in busy queue */
 			else if (pthread_queue_busy->head == self &&
 					 pthread_queue_busy->rear != self)
@@ -112,7 +112,7 @@ void *child_work(void *ptr)
 				//自己前后置空
 				self->next = self->prev = NULL;
 			}
-
+			//本节点在尾巴
 			/*the last one thread in busy queue */
 			else if (pthread_queue_busy->head != self &&
 					 pthread_queue_busy->rear == self)
@@ -123,7 +123,7 @@ void *child_work(void *ptr)
 				pthread_queue_busy->rear->next = NULL;
 				self->next = self->prev = NULL;
 			}
-
+			//中间
 			/*middle one */
 			else
 			{

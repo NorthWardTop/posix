@@ -10,7 +10,7 @@ LDFLAGS = -lpthread
 all:$(TARGET) client
 
 $(OBJECT):$(SRC)
-	$(CC)  -c $(INCLUDES) ${SRC}
+	$(CC) $(CCFLAG)  -c $(INCLUDES) ${SRC}
 
 $(TARGET):$(OBJECT)
 	$(CC) $(CCFLAG) -o $@ $(OBJECT) $(LDFLAGS)

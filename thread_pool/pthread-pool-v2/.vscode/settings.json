@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"pthread_pool.h": "c"
+	},
+	"C_Cpp.errorSquiggles": "Enabled"
+}
